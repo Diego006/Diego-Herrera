@@ -1,0 +1,123 @@
+# Diego-Herrera
+#proyecto 1 optmizado 
+library(psych)
+library(dplyr)
+library(stringr)
+library(datasets)
+library(tidyverse)
+library(quanteda)
+library(tm)
+library(tidytext)
+library(RWeka)
+
+#cargando datoss
+sanguchez <- sanguchezz
+
+sanguchez <- sanguchez[,!(colnames(sanguchez) %in% c("url", "Direccion", "texto"))] 
+
+ordenar_NOTAS <- sanguchez[order(sanguchez$nota,decreasing = TRUE),]
+
+#####strsplit(sanguchez$Ingredientes,",") #funcion que me separa string al parece no sirve hatsa el momente
+
+
+#funcion que me transforma todos los string a mayuscula
+
+sanguchez$Ingredientes = str_to_upper(sanguchez$Ingredientes)
+
+
+sanguchez$Precio <- as.numeric(gsub('[$.aprox]', '', sanguchez$Precio))
+
+#FUNCIONES
+sanguchez$Ingredientes <- as.character(sanguchez$Ingredientes)
+nota_5y4 <- filter(sanguchez, nota > 3 )
+
+#Limpiando y Ordenando ingredientes
+
+tabla_ingredientes_nota5y4 <-dfm(nota_5y4$Ingredientes)
+gsub("[[:punct:]]", ".", tabla_ingredientes_nota5y4) #elimina puntuaciones
+tabla_ingredientes_nota5y4 <- tabla_ingredientes_nota5y4[,!(colnames(tabla_ingredientes_nota5y4) %in% c(",", "y", "de", "en","al", ".", "con", "la", ")", "(", "a", "un"))] #elimina cadenas string indicadas
+textstat_frequency(tabla_ingredientes_nota5y4, n = 35)
+textplot_wordcloud(tabla_ingredientes_nota5y4, max_words = 30)   #grafico de palabras que se repiten mas
+
+#Veremos otra forma de ver los ingredientes que mas se repiten en las mejores notas, pero son en cuanto a carnes
+lomo <- nota_5y4[str_detect(nota_5y4$Ingredientes, "LOMO"), ] 
+CHURRASCO <- nota_5y4[str_detect(nota_5y4$Ingredientes, "CHURRASCO"), ] #Solo uno de estos. 
+MECHADA <- nota_5y4[str_detect(nota_5y4$Ingredientes, "MECHADA"), ] #PODEMOS VER SOLO 4 PRODUCTOS RELACIONADOS CON Mechada CON NOTA 5
+POLLO <- nota_5y4[str_detect(nota_5y4$Ingredientes, "POLLO"), ] #PODEMOS VER SOLO 4 PRODUCTOS RELACIONADOS CON Pollo CON NOTA 5
+SALCHICHA <- nota_5y4[str_detect(nota_5y4$Ingredientes, "SALCHICHA"), ] #DESCARTADO NINGUN PRODUCTO 
+ALBONDIGAS <- nota_5y4[str_detect(nota_5y4$Ingredientes, "ALBONDIGAS"), ] #QUEDA DESCARTADO, NINGUN PRODUCTO
+HAMBURGUESA <- nota_5y4[str_detect(nota_5y4$Ingredientes, "HAMBURGUESA"), ] ##PODEMOS VER SOLO 11 PRODUCTOS RELACIONADOS CON Hamburguesa CON NOTA 5
+TOCINO <- nota_5y4[str_detect(nota_5y4$Ingredientes, "TOCINO"), ] ##PODEMOS VER SOLO 12 PRODUCTOS RELACIONADOS CON TOCINO CON NOTA 5
+PLATEADA <- nota_5y4[str_detect(nota_5y4$Ingredientes, "PLATEADA"), ] #SOLO 1
+JAMON <- nota_5y4[str_detect(nota_5y4$Ingredientes, "JAMON"), ] ## DESCARTADO 
+CERDO <- nota_5y4[str_detect(nota_5y4$Ingredientes, "CERDO"), ] ## PODEMOS VER SOLO 4 PRODUCTOS RELACIONADOS CON CERDO CON NOTA 5
+MILANESA <- nota_5y4[str_detect(nota_5y4$Ingredientes, "MILANESA"), ] # SOLO 1
+
+#AHORA CON LOS INGREDIENTES ESPECIFICOS
+
+QUESO_MOZZARELLA <- nota_5y4[str_detect(nota_5y4$Ingredientes, "QUESO MOZZARELLA"), ] 
+QUESO_azul <- nota_5y4[str_detect(nota_5y4$Ingredientes, "QUESO AZUL"), ]
+QUESO_CHEDDAR <- nota_5y4[str_detect(nota_5y4$Ingredientes, "QUESO CHEDDAR"), ] 
+QUESO_CREMA <- nota_5y4[str_detect(nota_5y4$Ingredientes, "QUESO CREMA"), ] 
+MAYONESA_NORMAL <- nota_5y4[str_detect(nota_5y4$Ingredientes, "MAYONESA"), ] 
+MAYONESA_CASERA <- nota_5y4[str_detect(nota_5y4$Ingredientes, "MAYONESA CASERA"), ] 
+CEBOLLA_MORADA <- nota_5y4[str_detect(nota_5y4$Ingredientes, "CEBOLLA MORADA"), ] 
+CEBOLLA_ACARAMELIZADA <- nota_5y4[str_detect(nota_5y4$Ingredientes, "CEBOLLA CARAMELIZADA"), ] 
+MIX_VERDE <- nota_5y4[str_detect(nota_5y4$Ingredientes, " MIX VERDE"), ] 
+AJI_VERDE <- nota_5y4[str_detect(nota_5y4$Ingredientes, " AJÍ VERDE"), ] 
+SALSA_BBQ<- nota_5y4[str_detect(nota_5y4$Ingredientes, "SALSA BBQ"), ] 
+SALSA <- nota_5y4[str_detect(nota_5y4$Ingredientes, "SALSA"), ] 
+PAN <- nota_5y4[str_detect(nota_5y4$Ingredientes, "PAN"), ]  
+CEBOLLA_BALSAMICA <- nota_5y4[str_detect(nota_5y4$Ingredientes, "CEBOLLA BALSAMICA"), ] 
+CEBOLLA_GRILLADAS <- nota_5y4[str_detect(nota_5y4$Ingredientes, "CEBOLLA GRILLADAS"), ] 
+PAN_CIABATTA <- nota_5y4[str_detect(nota_5y4$Ingredientes, "PAN CIABATTA"), ] 
+PAN_FRICA <- nota_5y4[str_detect(nota_5y4$Ingredientes, "PAN FRICA"), ]
+PAN_FOCACCIA <- nota_5y4[str_detect(nota_5y4$Ingredientes, "PAN FOCACCIA"), ] 
+PAN_BRIOCHE <- nota_5y4[str_detect(nota_5y4$Ingredientes, "PAN BRIOCHE"), ] 
+PAN_POTATO_ROLL <-nota_5y4[str_detect(nota_5y4$Ingredientes, "PAN POTATO ROLL"), ] 
+PAN_FRANCÉS <- nota_5y4[str_detect(nota_5y4$Ingredientes, "PAN FRANCÉS"), ] 
+PAN_DE_HAMBUERGUESA <- nota_5y4[str_detect(nota_5y4$Ingredientes, "PAN DE HAMBUERGUESA"), ]
+HUEVO_FRITO <- nota_5y4[str_detect(nota_5y4$Ingredientes, "HUEVO FRITO"), ]
+CARNE <- nota_5y4[str_detect(nota_5y4$Ingredientes, "CARNE"), ]
+
+
+#RANKING EN QUESO
+#1. QUESO CHEDDAR
+#2. QUESO AZUL 
+#3. QUESO MOZZARELLA 
+#3.QUESO CREMA
+
+##RANKIN EN CEBOLLA
+#1. CEBOLLA CARAMELIZADA
+#2. CEBOLA MORADA
+  
+
+## RANKING EN PAN
+#PAN CIABATTA
+#PAN BRIOCHE
+# PAN FRICA
+
+
+
+Hambuerguesa_ideal  <- data.frame(ingrediente = c("Hamburguesa","Queso (Cheddar de preferencia)","Cebolla (Caramelizada de preferencia)","Tocino","Mayonesa","Palta"),
+                            ranking=c("9","1",
+                                      "2","10",
+                                      "3","8"),
+                            calificacion =c("5"))
+
+
+
+
+
+
+
+
+
+
+Hambuerguesa_ideal2 <- data.frame(ingrediente = c("Hamburguesa","Queso (AZUL de preferencia)","Cebolla (MORADA de preferencia)" , "TOMATE","LECHUGA","Palta", "MAYONESA"),
+                             ranking=c("9","1",
+                                       "2","4",
+                                       "6","8", "3"),
+                             
+                             calificacion =c("5"))
+
